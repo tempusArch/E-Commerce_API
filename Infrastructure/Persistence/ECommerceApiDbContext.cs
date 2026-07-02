@@ -69,7 +69,8 @@ public class ECommerceApiDbContext : DbContext {
                 j => {
                     j.HasKey("ProductId", "CategoryId");
                     j.ToTable("ProductCategoryTable");
-                });
+                }
+            );
 
         modelBuilder.Entity<Cart>()
             .HasMany(c => c.CartItemRisuto)
