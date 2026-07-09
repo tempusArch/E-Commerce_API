@@ -24,13 +24,13 @@ public class UserController : ControllerBase {
     [HttpPost("register")]
     [AllowAnonymous]
     public async Task<ActionResult<UserResponse>> RegisterUser(RegisterUserDto dto) {
-        return Created(string.Empty, await _mediator.Send(new CreateUser.CreateUserCommand(dto)));
+        return Created(string.Empty, await _mediator.Send(new CreateUserCommand(dto)));
     }
 
     [HttpPost("login")]
     [AllowAnonymous]
     public async Task<IActionResult> LoginUser(LoginUserDto dto) {
-        var theUser = await _mediator.Send(new UserLogin.UserLoginCommand(dto));
+        var theUser = await _mediator.Send(new UserLoginCommand(dto));
 
         var accessToken = _jwtService.Generate_JWT(theUser);
         var refreshToken = _jwtService.Generate_RefreshToken(theUser.Id.ToString());

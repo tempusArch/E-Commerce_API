@@ -10,7 +10,7 @@ public class OrderDto {
     public int OrderId {get; set;}
     public OrderStatus OrderStatus {get; set;}
     
-    public string? PaymentIntenId {get; set;}
+    public string? PaymentIntentId {get; set;}
     //public string? ClientSecret {get; set;}
 
     public DateTime CreatedAt {get; set;} = DateTime.UtcNow;

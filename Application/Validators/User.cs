@@ -16,7 +16,7 @@ public class RegisterUserDtoValidator : AbstractValidator<RegisterUserDto> {
     }
 }
 
-public class CreateUserCommandValidator : AbstractValidator<CreateUser.CreateUserCommand> {
+public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand> {
     public CreateUserCommandValidator() {
         RuleFor(x => x.RegisterUserDto).SetValidator(new RegisterUserDtoValidator());
     }
@@ -31,9 +31,24 @@ public class LoginUserDtoValidator : AbstractValidator<LoginUserDto> {
     }
 }
 
-public class UserLoginCommandtValidator : AbstractValidator<UserLogin.UserLoginCommand> {
+public class UserLoginCommandtValidator : AbstractValidator<UserLoginCommand> {
     public UserLoginCommandtValidator() {
         RuleFor(x => x.LoginUserDto).SetValidator(new LoginUserDtoValidator());
     }
 }
 
+public class GetOneUserQueryValidator : AbstractValidator<GetOneUserQuery> {
+    public GetOneUserQueryValidator() {
+        RuleFor(x => x.Id).NotEmpty().GreaterThan(0).WithMessage("User Id must be greater than 0");
+    }
+}
+
+public class GetAllUsersQueryValidator : AbstractValidator<GetAllUsersQuery> {
+    public GetAllUsersQueryValidator() {  
+        RuleFor(x => x.Page).NotEmpty().GreaterThan(0).WithMessage("Page must be greater than 0");
+
+        RuleFor(x => x.Limit).NotEmpty().GreaterThan(0).WithMessage("Limit Id must be greater than 0");
+
+
+    }
+}

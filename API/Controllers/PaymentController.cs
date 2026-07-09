@@ -27,7 +27,7 @@ public class PaymentController : ControllerBase {
         if (string.IsNullOrEmpty(userId))
             throw new Exception("User ID claim missing");
 
-        var result = await _mediator.Send(new CreatePaymentIntent.CreatePaymentIntentCommand(int.Parse(userId), orderId));
+        var result = await _mediator.Send(new CreatePaymentIntentCommand(int.Parse(userId), orderId));
         return Created(string.Empty, result);
     }
 
@@ -49,8 +49,7 @@ public class PaymentController : ControllerBase {
         }
         
 
-        /*switch (stripeEvent.Type)
-        {
+        /*switch (stripeEvent.Type) {
             case "payment_intent.succeeded":
                 var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
                 await HandlePaymentIntentSucceeded(paymentIntent);
@@ -69,8 +68,7 @@ public class PaymentController : ControllerBase {
         return Ok(); 
     }
 
-    private async Task HandlePaymentIntentSucceeded(PaymentIntent intent)
-    {
+    private async Task HandlePaymentIntentSucceeded(PaymentIntent intent) {
         var orderId = intent.Metadata["orderId"];
 
         var order = await _context.OrderTable.FindAsync(int.Parse(orderId));
@@ -83,8 +81,7 @@ public class PaymentController : ControllerBase {
         await _context.SaveChangesAsync();
     }
 
-    private async Task HandlePaymentFailed(PaymentIntent intent)
-    {
+    private async Task HandlePaymentFailed(PaymentIntent intent) {
         var orderId = intent.Metadata["orderId"];
 
         var order = await _context.OrderTable.FindAsync(int.Parse(orderId));

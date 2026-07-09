@@ -19,7 +19,7 @@ public class CreateProductDtoValidator : AbstractValidator<CreateProductDto> {
     }
 }
 
-public class CreateProductCommandValidator : AbstractValidator<CreateProduct.CreateProductCommand> {
+public class CreateProductCommandValidator : AbstractValidator<CreateProductCommand> {
     public CreateProductCommandValidator() {
         RuleFor(x => x.CreateProductDto).NotNull().SetValidator(new CreateProductDtoValidator());
     }
@@ -41,7 +41,7 @@ public class UpdateProductDtoValidator : AbstractValidator<UpdateProductDto> {
     }
 }
 
-public class UpdateProdcutCommandValidator : AbstractValidator<UpdateProduct.UpdateProductCommand> {
+public class UpdateProdcutCommandValidator : AbstractValidator<UpdateProductCommand> {
     public UpdateProdcutCommandValidator() {
         RuleFor(x => x.UpdateProductDto).NotNull().SetValidator(new UpdateProductDtoValidator());
     }

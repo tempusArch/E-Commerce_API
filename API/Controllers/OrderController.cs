@@ -26,7 +26,7 @@ public class OrderController : ControllerBase {
         if (string.IsNullOrEmpty(userId))
             throw new Exception("User ID claim missing");
 
-        return Ok(await _mediator.Send(new GetOneUsersAllOrders.GetOneUsersAllOrdersQuery(int.Parse(userId))));
+        return Ok(await _mediator.Send(new GetOneUsersAllOrdersQuery(int.Parse(userId))));
     }
 
     [HttpGet("{orderId}")]
@@ -36,7 +36,7 @@ public class OrderController : ControllerBase {
         if (string.IsNullOrEmpty(userId))
             throw new Exception("User ID claim missing");
 
-        return Ok(await _mediator.Send(new GetSingleOrder.GetSingleOrderQuery(int.Parse(userId), orderId)));
+        return Ok(await _mediator.Send(new GetOneOrderQuery(int.Parse(userId), orderId)));
     }
 
     [HttpPost]
@@ -50,7 +50,7 @@ public class OrderController : ControllerBase {
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.UserId == int.Parse(userId));
 
-        var result = await _mediator.Send(new CreateOrder.CreateOrderCommand(int.Parse(userId), cart.Id));
+        var result = await _mediator.Send(new CreateOrderCommand(int.Parse(userId), cart.Id));
 
         return Created(string.Empty, result);
     }
@@ -62,7 +62,7 @@ public class OrderController : ControllerBase {
         if (string.IsNullOrEmpty(userId))
             throw new Exception("User ID claim missing");
 
-        await _mediator.Send(new DeleteOrder.DeleteOrderCommand(int.Parse(userId), orderId));
+        await _mediator.Send(new DeleteOrderCommand(int.Parse(userId), orderId));
 
         return NoContent();
     }

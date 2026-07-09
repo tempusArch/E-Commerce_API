@@ -30,7 +30,7 @@ public class CartController : ControllerBase {
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.UserId == int.Parse(userId));
 
-        return Ok(await _mediator.Send(new GetAllCartItems.GetAllCartItemsQuery(cart.Id)));
+        return Ok(await _mediator.Send(new GetAllCartItemsQuery(cart.Id)));
     }
 
     [HttpGet("{productId}")]
@@ -44,7 +44,7 @@ public class CartController : ControllerBase {
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.UserId == int.Parse(userId));
 
-        return Ok(await _mediator.Send(new GetSingleCartItem.GetSingleCartItemQuery(productId, cart.Id)));
+        return Ok(await _mediator.Send(new GetOneCartItemQuery(productId, cart.Id)));
     }
 
     [HttpPost("{productId}")]
@@ -58,7 +58,7 @@ public class CartController : ControllerBase {
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.UserId == int.Parse(userId));
 
-        var result = await _mediator.Send(new AddIntoCartItem.AddIntoCartItemCommand(new CartItem {
+        var result = await _mediator.Send(new AddIntoCartItemCommand(new CartItem {
             ProductId = productId,
             CartId = cart.Id,
             Quantity = quantity
@@ -78,7 +78,7 @@ public class CartController : ControllerBase {
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.UserId == int.Parse(userId));
 
-        return Ok(await _mediator.Send(new UpdateCartItem.UpdateSingleCartItemCommand(new CartItem {
+        return Ok(await _mediator.Send(new UpdateCartItemCommand(new CartItem {
             ProductId = productId,
             CartId = cart.Id,
             Quantity = quantity
@@ -96,7 +96,7 @@ public class CartController : ControllerBase {
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.UserId == int.Parse(userId));
 
-        await _mediator.Send(new DeleteCartItem.DeleteCartItemCommand(productId, cart.Id));
+        await _mediator.Send(new DeleteCartItemCommand(productId, cart.Id));
 
         return NoContent();
     }

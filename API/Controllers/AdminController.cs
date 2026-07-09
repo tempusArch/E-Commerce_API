@@ -27,7 +27,7 @@ public class AdminController : ControllerBase {
         if (string.IsNullOrEmpty(userId))
             throw new Exception("User ID claim missing");
 
-        var result = await _mediator.Send(new CreateProduct.CreateProductCommand(dto));
+        var result = await _mediator.Send(new CreateProductCommand(dto));
 
         return Created(string.Empty, result);
     }
@@ -40,7 +40,7 @@ public class AdminController : ControllerBase {
             throw new Exception("User ID claim missing");
 
         dto.Id = productId;
-        return Ok(await _mediator.Send(new UpdateProduct.UpdateProductCommand(dto)));
+        return Ok(await _mediator.Send(new UpdateProductCommand(dto)));
     }
 
     [HttpDelete("product/{productId}")]
@@ -50,7 +50,7 @@ public class AdminController : ControllerBase {
         if (string.IsNullOrEmpty(userId))
             throw new Exception("User ID claim missing");
                     
-        await _mediator.Send(new DeleteProduct.DeleteProductCommand(productId));
+        await _mediator.Send(new DeleteProductCommand(productId));
 
         return NoContent();
     }
@@ -62,7 +62,7 @@ public class AdminController : ControllerBase {
         if (string.IsNullOrEmpty(userId))
             throw new Exception("User ID claim missing");
 
-        var result = await _mediator.Send(new CreateCategory.CreateCategoryCommand(categoryName));
+        var result = await _mediator.Send(new CreateCategoryCommand(categoryName));
 
         return Created(string.Empty, result);
     }
@@ -74,7 +74,7 @@ public class AdminController : ControllerBase {
         if (string.IsNullOrEmpty(userId))
             throw new Exception("User ID claim missing");
 
-        return Ok(await _mediator.Send(new UpdateCategory.UpdateCategoryCommand(categoryId, categoryName)));
+        return Ok(await _mediator.Send(new UpdateCategoryCommand(categoryId, categoryName)));
     }
 
     [HttpDelete("category/{categoryId}")]
@@ -84,8 +84,28 @@ public class AdminController : ControllerBase {
         if (string.IsNullOrEmpty(userId))
             throw new Exception("User ID claim missing");
                     
-        await _mediator.Send(new DeleteCategory.DeleteCategoryCommand(categoryId));
+        await _mediator.Send(new DeleteCategoryCommand(categoryId));
 
         return NoContent();
+    }
+
+    [HttpGet("user/{Id}")]
+    public async Task<ActionResult<User>> GetOneUser(int Id) {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userId))
+            throw new Exception("User ID claim missing");
+
+        return Ok(await _mediator.Send(new GetOneUserQuery(Id)));
+    }
+
+    [HttpGet("user")]
+    public async Task<ActionResult<UserListResponse>> GetAllUsers([FromQuery] int page = 1, [FromQuery] int limit = 10) {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userId))
+            throw new Exception("User ID claim missing");
+
+        return Ok(await _mediator.Send(new GetAllUsersQuery(page, limit)));
     }
 }

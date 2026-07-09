@@ -143,3 +143,4 @@ C:\Users\homage\E-CommerceAPI\bin\Debug\net8.0\Microsoft.Extensions.Logging.Abst
 C:\Users\homage\E-CommerceAPI\bin\Debug\net8.0\Microsoft.Extensions.Options.dll
 C:\Users\homage\E-CommerceAPI\bin\Debug\net8.0\Microsoft.Extensions.Primitives.dll
 C:\Users\homage\E-CommerceAPI\bin\Debug\net8.0\System.Diagnostics.DiagnosticSource.dll
+C:\Users\homage\E-CommerceAPI\obj\Debug\net8.0\E-CommerceAPI.sourcelink.json

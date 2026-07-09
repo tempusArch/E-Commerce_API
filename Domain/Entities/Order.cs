@@ -5,7 +5,7 @@ public class Order {
 
     public decimal TotalPrice {get; set;}
     public string? PaymentIntentId {get; set;}
-    public OrderStatus OrderStatus {get; set;} = OrderStatus.Paid;
+    public OrderStatus OrderStatus {get; set;}
 
     public int UserId {get; set;}
     public User User {get; set;}

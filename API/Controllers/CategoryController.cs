@@ -20,7 +20,7 @@ public class CategoryController : ControllerBase {
     [HttpGet("{categoryId}")]
     [AllowAnonymous]
     public async Task<ActionResult<ReadCategoryDto>> GetOneCategory(int categoryId) {
-        return Ok(await _mediator.Send(new GetOneCategory.GetOneCategoryQuery(categoryId)));
+        return Ok(await _mediator.Send(new GetOneCategoryQuery(categoryId)));
     }
 
     [HttpGet]
@@ -32,6 +32,6 @@ public class CategoryController : ControllerBase {
         [FromQuery] int limit = 10
     ) {
         
-        return Ok(await _mediator.Send(new GetManyCategories.GetManyCategoriesQuery(categoryName, productName, page, limit)));
+        return Ok(await _mediator.Send(new GetManyCategoriesQuery(categoryName, productName, page, limit)));
     }
 }

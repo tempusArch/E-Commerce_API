@@ -20,7 +20,7 @@ public class ProductController : ControllerBase {
     [HttpGet("{productId}")]
     [AllowAnonymous]
     public async Task<ActionResult<ReadProductDto>> GetSingleProduct(int productId) {
-        return Ok(await _mediator.Send(new GetSingleProduct.GetSingleProductQuery(productId)));
+        return Ok(await _mediator.Send(new GetOneProductQuery(productId)));
     }
 
     [HttpGet]
@@ -32,6 +32,6 @@ public class ProductController : ControllerBase {
         [FromQuery] int limit = 10
     ) {
         
-        return Ok(await _mediator.Send(new GetManyProducts.GetManyProductsQuery(categoryName, productName, page, limit)));
+        return Ok(await _mediator.Send(new GetManyProductsQuery(categoryName, productName, page, limit)));
     }
 }
