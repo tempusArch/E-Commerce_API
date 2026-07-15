@@ -7,6 +7,7 @@ public class User {
     public string Email {get; set;}
     public string PasswordHashed {get; set;}
 
+    public int CartId {get; set;}
     public Cart? Cart {get; set;}
     public List<Order> OrderRisuto {get; set;} = new List<Order>();
 

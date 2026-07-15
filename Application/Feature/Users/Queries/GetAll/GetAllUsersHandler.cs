@@ -15,22 +15,28 @@ public class GetAllUsersHandler : IRequestHandler<GetAllUsersQuery, UserListResp
     }
 
     public async Task<UserListResponse> Handle(GetAllUsersQuery query, CancellationToken cancellationToken) {
-        IQueryable<User> source = _context.UserTable.AsNoTracking();
-
-        if (!source.Any())
-            throw new NotFoundException("No user found");
+        var result = _context.UserTable
+            .AsNoTracking()
+            .Select(x => new ReadUserDtoAdmin {
+                UserId = x.Id,
+                UserName = x.Name,
+                Email = x.Email,
+                CartId = x.CartId,
+                CartItemRisuto = x.Cart.CartItemRisuto,
+                OrderRisuto = x.OrderRisuto,
+                Role = x.Role
+            });
 
         var limit = Math.Min(query.Limit, 100);
-
-        var arranged = await source
-            .OrderBy(u => u.Id)
+            
+        var arranged = await result
+            .OrderBy(x => x.Role)
+            .ThenBy(x => x.UserId)
             .Skip((query.Page - 1) * limit)
             .Take(limit)
             .ToListAsync(cancellationToken);
 
-        var result = _mapper.Map<IEnumerable<User>>(arranged);
-
-        return new UserListResponse {Items = result};
+        return new UserListResponse {Items = arranged};
     }
 }
 

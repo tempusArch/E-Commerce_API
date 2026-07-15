@@ -3,4 +3,4 @@ using ECommerceAPI.Domain;
 
 namespace ECommerceAPI.Application;
 
-public record GetOneUserQuery(int Id) : IRequest<User>;
+public record GetOneUserQuery(int Id) : IRequest<ReadUserDtoAdmin>;

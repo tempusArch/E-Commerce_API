@@ -1,7 +1,9 @@
 namespace ECommerceAPI.Domain;
 
 public enum OrderStatus {
-    Paid = 1,
-    Shipper = 2,
-    Cancelled = 3
+    Unpaid = 1,
+    Paid = 2,
+    Shipping = 3,
+    Completed = 4,
+    Cancelled = 5
 }

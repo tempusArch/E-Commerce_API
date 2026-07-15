@@ -6,22 +6,22 @@ using Stripe;
 
 namespace ECommerceAPI.Application;
 
-public class CreateOrderHandler : IRequestHandler<CreateOrderCommand, OrderDto> {
+public class CreateOrderHandler : IRequestHandler<CreateOrderCommand, ReadOrderDto> {
     private readonly ECommerceApiDbContext _context;
     public CreateOrderHandler(ECommerceApiDbContext context) {
         _context = context;         
     }
 
-    public async Task<OrderDto> Handle(CreateOrderCommand command, CancellationToken cancellationToken) {
-        var allCartItems = await _context.CartItemTable
+    public async Task<ReadOrderDto> Handle(CreateOrderCommand command, CancellationToken cancellationToken) {
+        var theOrderingOnes = await _context.CartItemTable
             .Include(x => x.Product)
-            .Where(x => x.CartId == command.CartId)
+            .Where(x => x.UserId == command.UserId)
             .ToListAsync(cancellationToken);
 
-        if (!allCartItems.Any())
+        if (!theOrderingOnes.Any())
             throw new NotFoundException("Your cart is empty");
 
-        foreach (var i in allCartItems) {
+        foreach (var i in theOrderingOnes) {
             if (i.Product.Quantity < i.Quantity) {
                 throw new InvalidOperationException($"Only {i.Product.Quantity} items of {i.Product.Name} available");
             }
@@ -29,45 +29,56 @@ public class CreateOrderHandler : IRequestHandler<CreateOrderCommand, OrderDto> 
             i.Product.Quantity -= i.Quantity;
         }
 
+        var totalPrice = theOrderingOnes.Sum(x => x.TotalPrice);
+
         var newOrder = new Order {
             UserId = command.UserId,
+            TotalPrice = totalPrice
         };
 
-        _context.OrderTable.Add(newOrder);
-
-        var orderItemRisuto = allCartItems
+        var newOrderItemRisuto = theOrderingOnes
             .Select(x => new OrderItem {
                 Order = newOrder,
-                Product = x.Product,
                 ProductId = x.ProductId,
-                Quantity = x.Quantity,            
-            }
-        );
-
-        _context.CartItemTable.RemoveRange(allCartItems);
-        _context.OrderItemTable.AddRange(orderItemRisuto);
-
-        List<SingleCartItemDto> allCartItemsDtoRisuto = allCartItems
-            .Select(x => new SingleCartItemDto {
-                //ProductId = x.ProductId,
-                ProductName = x.Product.Name,
-                ProductDescription = x.Product.Description,
+                UnitPrice = x.Product.Price,
                 Quantity = x.Quantity,
-                UnitPrice = x.Product.Price
+                UserId = x.UserId           
             })
             .ToList();
 
-        var allCartItemsDto = new AllCartItemsDto(allCartItemsDtoRisuto);
-        var totalAmount = allCartItemsDto.TotalPrice;
-
-        newOrder.TotalPrice = allCartItemsDto.TotalPrice;
-
-        var result = new OrderDto {
-            OrderId = newOrder.Id,
-            AllCartItems = allCartItemsDto
-        };
+        _context.OrderTable.Add(newOrder);
+        _context.CartItemTable.RemoveRange(theOrderingOnes);
+        _context.OrderItemTable.AddRange(newOrderItemRisuto);
 
         await _context.SaveChangesAsync(cancellationToken);
+
+        var result = await _context.OrderTable
+            .AsNoTracking()
+            .Where(x => x.UserId == command.UserId && x.Id == newOrder.Id)
+            .Select(x => new ReadOrderDto {
+                OrderId = x.Id,
+                TotalPrice = x.TotalPrice,
+                OrderStatus = x.OrderStatus,
+
+                OrderItemRisuto = x.OrderItemRisuto
+                    .Select(z => new ReadOrderItemDto {
+                        ProductId = z.ProductId,
+                        ProductName = z.Product.Name,
+                        ProductDescription = z.Product.Description,
+                        
+                        UnitPrice = z.UnitPrice,
+                        Quantity = z.Quantity,
+                        
+                    })
+                    .ToList(),
+                CreatedAt = x.CreatedAt,
+                UpdatedAt = x.UpdatedAt
+                
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (result == null)
+            throw new InvalidOperationException("Order creation failed");
 
         return result;
     }

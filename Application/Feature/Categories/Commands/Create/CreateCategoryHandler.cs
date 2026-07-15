@@ -15,7 +15,8 @@ public class CreateCategoryHandler : IRequestHandler<CreateCategoryCommand, Cate
     }
 
     public async Task<Category> Handle(CreateCategoryCommand command, CancellationToken cancellationToken) {
-        var isExisted = await _context.CategoryTable.AnyAsync(c => c.Name == command.Name, cancellationToken);
+        var isExisted = await _context.CategoryTable
+            .AnyAsync(c => c.Name == command.Name, cancellationToken);
 
         if (isExisted)
             throw new InvalidOperationException("Category has already existed");

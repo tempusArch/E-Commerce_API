@@ -3,6 +3,7 @@ using ECommerceAPI.Infrastructure;
 using ECommerceAPI.Controller;
 using ECommerceAPI.Domain;
 using MediatR;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -39,10 +40,12 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddAutoMapper(cfg => { }, typeof(MappingProfile).Assembly);
 
 
-builder.Services.AddScoped<ICurrentUserAccessor, CurrentUserAccessor>();
+builder.Services.AddScoped<IHttpContextService, HttpContextService>();
 builder.Services.AddScoped<DbSeeder>();
 builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
 builder.Services.AddSingleton<IJwtService, JwtService>();
+
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 builder.Services.AddMediatR(typeof(Program).Assembly);
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
@@ -131,8 +134,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-using (var scope = app.Services.CreateScope())
-{
+using (var scope = app.Services.CreateScope()) {
     var services = scope.ServiceProvider;
 
     var seeder = services.GetRequiredService<DbSeeder>();

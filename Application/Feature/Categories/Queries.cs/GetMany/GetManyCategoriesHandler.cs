@@ -15,10 +15,7 @@ public class GetManyCategoriesHandler : IRequestHandler<GetManyCategoriesQuery, 
     }
 
     public async Task<CategoryListResponse> Handle(GetManyCategoriesQuery query, CancellationToken cancellationToken) {
-        IQueryable<Category> source = _context.CategoryTable
-            .AsNoTracking()
-            .Include(p => p.ProductRisuto);
-
+        IQueryable<Category> source = _context.CategoryTable.AsNoTracking();
             
         if (!string.IsNullOrWhiteSpace(query.CategoryName)) 
             source = source.Where(p => p.Name.Contains(query.CategoryName));
@@ -26,19 +23,28 @@ public class GetManyCategoriesHandler : IRequestHandler<GetManyCategoriesQuery, 
         if (!string.IsNullOrWhiteSpace(query.ProductName))
             source = source.Where(p => p.ProductRisuto.Any(c => c.Name.Contains(query.ProductName)));
 
-        if (!source.Any())
-            throw new NotFoundException("No Category Found");
+        var result = source
+            .Select(x => new ReadCategoryDto {
+                CategoryId = x.Id,
+                CategoryName = x.Name,
+                ProductRisuto = x.ProductRisuto
+                    .Select(z => new ReadProductDto {
+                        ProductId = z.Id,
+                        ProductName = z.Name,
+                        ProductDescription = z.Description,
+                        Price = z.Price
+                    })
+                    .ToList()
+            });
                  
         var limit = Math.Min(query.Limit, 100);
             
-        var arranged = await source
-            .OrderBy(p => p.Id)
+        var arranged = await result
+            .OrderBy(p => p.CategoryName)
             .Skip((query.Page - 1) * limit)
             .Take(limit)
             .ToListAsync(cancellationToken);
 
-        var result = _mapper.Map<IEnumerable<ReadCategoryDto>>(arranged);
-
-        return new CategoryListResponse {Items = result};
+        return new CategoryListResponse {Items = arranged};
     }
 }

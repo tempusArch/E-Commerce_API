@@ -15,7 +15,8 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Produc
     }
 
     public async Task<Product> Handle(CreateProductCommand command, CancellationToken cancellationToken) {
-        var isExisted = await _context.ProductTable.AnyAsync(c => c.Name == command.CreateProductDto.Name, cancellationToken);
+        var isExisted = await _context.ProductTable
+            .AnyAsync(c => c.Name == command.CreateProductDto.Name, cancellationToken);
 
         if (isExisted)
             throw new InvalidOperationException("Product has already existed");

@@ -6,7 +6,7 @@ using ECommerceAPI.Infrastructure;
 
 namespace ECommerceAPI.Application;
 
-public class GetOneUserHandler : IRequestHandler<GetOneUserQuery, User> {
+public class GetOneUserHandler : IRequestHandler<GetOneUserQuery, ReadUserDtoAdmin> {
     private readonly ECommerceApiDbContext _context;
     private readonly IMapper _mapper;
     public GetOneUserHandler(ECommerceApiDbContext context, IMapper mapper) {
@@ -14,11 +14,20 @@ public class GetOneUserHandler : IRequestHandler<GetOneUserQuery, User> {
         _mapper = mapper;
     }
 
-    public async Task<User> Handle(GetOneUserQuery query, CancellationToken cancellationToken) {
+    public async Task<ReadUserDtoAdmin> Handle(GetOneUserQuery query, CancellationToken cancellationToken) {
         var theOne = await _context.UserTable
             .AsNoTracking()
-            .Include(u => u.OrderRisuto)
-            .FirstOrDefaultAsync(u => u.Id == query.Id, cancellationToken);
+            .Where(x => x.Id == query.Id)
+            .Select(x => new ReadUserDtoAdmin {
+                UserId = x.Id,
+                UserName = x.Name,
+                Email = x.Email,
+                CartId = x.CartId,
+                CartItemRisuto = x.Cart.CartItemRisuto,
+                OrderRisuto = x.OrderRisuto,
+                Role = x.Role
+            })
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (theOne == null)
             throw new NotFoundException("User not found");

@@ -11,7 +11,8 @@ public class CreateProductDtoValidator : AbstractValidator<CreateProductDto> {
         RuleFor(cp => cp.Description).NotEmpty().WithMessage("Product description can not be empty")
             .MaximumLength(600).WithMessage("Product description can not exceed 600 characters");
 
-        RuleFor(cp => cp.Price).GreaterThan(0).WithMessage("Product price can not be 0 or negative");
+        RuleFor(cp => cp.Price).GreaterThan(0).WithMessage("Price must be greater than 0")
+            .PrecisionScale(10, 2, false).WithMessage("Price have a maximum of 10 digits and 2 decimal places.");
 
         RuleFor(cp => cp.Quantity).GreaterThan(0).WithMessage("Product quantity can not be 0 or negative");
 
@@ -33,8 +34,9 @@ public class UpdateProductDtoValidator : AbstractValidator<UpdateProductDto> {
         RuleFor(up => up.Description).NotEmpty().WithMessage("Product description can not be empty")
             .MaximumLength(600).WithMessage("Product description can not exceed 600 characters");
 
-        RuleFor(up => up.Price).GreaterThan(0).WithMessage("Product price can not be 0 or negative");
-
+        RuleFor(up => up.Price).GreaterThan(0).WithMessage("Price must be greater than 0")
+            .PrecisionScale(10, 2, false).WithMessage("Price have a maximum of 10 digits and 2 decimal places.");
+            
         RuleFor(up => up.Quantity).GreaterThan(0).WithMessage("Product quantity can not be 0 or negative");
 
         RuleFor(up => up.CategoryIdRisuto).NotEmpty().WithMessage("CategortId can not be empty");

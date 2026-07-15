@@ -1,5 +1,3 @@
-using System.Net.Http.Headers;
-
 namespace ECommerceAPI.Domain;
 
 public class CartItem {
@@ -10,5 +8,8 @@ public class CartItem {
     public Cart Cart {get; set;}
 
     public int Quantity {get; set;}
-    public decimal TotalPrice => Product!.Price * Quantity;
+    public decimal TotalPrice => Product.Price * Quantity;
+
+    public int UserId {get; set;}
+
 }

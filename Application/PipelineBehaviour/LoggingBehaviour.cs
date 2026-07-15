@@ -1,20 +1,21 @@
 using System.Diagnostics;
 using MediatR;
 using Serilog;
+using ECommerceAPI.Infrastructure;
 
 namespace ECommerceAPI.Application;
 
 public class LoggingBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : IRequest<TResponse> {
     private readonly ILogger<LoggingBehaviour<TRequest, TResponse>> _logger;
-    private readonly ICurrentUserAccessor _userAccessor;
-    public LoggingBehaviour(ILogger<LoggingBehaviour<TRequest, TResponse>> logger, ICurrentUserAccessor userAccessor) {
+    private readonly IHttpContextService _httpContextService;
+    public LoggingBehaviour(ILogger<LoggingBehaviour<TRequest, TResponse>> logger, IHttpContextService httpContextService) {
         _logger = logger;
-        _userAccessor = userAccessor;
+        _httpContextService = httpContextService;
     }
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken) {
         var requestName = typeof(TRequest).FullName;
-        var userId = _userAccessor.GetCurrentUserId();
+        var userId = _httpContextService.GetCurrentUserId();
         var user = userId == 0 ? "Anonymous User" : userId.ToString();
 
         var _stopWatch = Stopwatch.StartNew();

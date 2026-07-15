@@ -17,7 +17,7 @@ public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Produc
     public async Task<Product> Handle(UpdateProductCommand command, CancellationToken cancellationToken) {
         var theOne = await _context.ProductTable
             .Include(p => p.CategoryRisuto)
-            .FirstOrDefaultAsync(p => p.Id == command.UpdateProductDto.Id, cancellationToken);
+            .FirstOrDefaultAsync(p => p.Id == command.ProductId, cancellationToken);
 
         if (theOne == null)
             throw new NotFoundException("Product not found");

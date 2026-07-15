@@ -9,7 +9,7 @@ public class RegisterUserDtoValidator : AbstractValidator<RegisterUserDto> {
         
         RuleFor(x => x.Email).NotEmpty().EmailAddress().WithMessage("Email is required");
 
-        RuleFor(x => x.Password).MinimumLength(8).WithMessage("Password must be at least 8 characters");
+        RuleFor(x => x.Password).Length(8, 16).WithMessage("Password must be at least 8 characters, less than 16 characters");
 
         RuleFor(x => x.ConfirmPassword).Equal(x => x.Password).WithMessage("Must match with password");
               
@@ -18,7 +18,7 @@ public class RegisterUserDtoValidator : AbstractValidator<RegisterUserDto> {
 
 public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand> {
     public CreateUserCommandValidator() {
-        RuleFor(x => x.RegisterUserDto).SetValidator(new RegisterUserDtoValidator());
+        RuleFor(x => x.RegisterUserDto).NotNull().SetValidator(new RegisterUserDtoValidator());
     }
 }
 
@@ -31,9 +31,9 @@ public class LoginUserDtoValidator : AbstractValidator<LoginUserDto> {
     }
 }
 
-public class UserLoginCommandtValidator : AbstractValidator<UserLoginCommand> {
-    public UserLoginCommandtValidator() {
-        RuleFor(x => x.LoginUserDto).SetValidator(new LoginUserDtoValidator());
+public class LoginUserCommandtValidator : AbstractValidator<LoginUserCommand> {
+    public LoginUserCommandtValidator() {
+        RuleFor(x => x.LoginUserDto).NotNull().SetValidator(new LoginUserDtoValidator());
     }
 }
 

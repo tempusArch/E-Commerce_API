@@ -32,6 +32,10 @@ public class DbSeeder {
             Name = "theChosenOne"
         };
 
+        theAdminOne.Cart = new Cart {
+            User = theAdminOne
+        };
+
         _context.UserTable.Add(theAdminOne);
         await _context.SaveChangesAsync();
     }

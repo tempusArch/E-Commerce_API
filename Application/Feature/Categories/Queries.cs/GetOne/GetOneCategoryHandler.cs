@@ -16,12 +16,24 @@ public class GetOneCategoryHandler : IRequestHandler<GetOneCategoryQuery, ReadCa
     public async Task<ReadCategoryDto> Handle(GetOneCategoryQuery query, CancellationToken cancellationToken) {
         var theOne = await _context.CategoryTable
             .AsNoTracking()
-            .Include(p => p.ProductRisuto)
-            .FirstOrDefaultAsync(c => c.Id == query.Id, cancellationToken);
+            .Where(x => x.Id == query.Id)
+            .Select(x => new ReadCategoryDto {
+                CategoryId = x.Id,
+                CategoryName = x.Name,
+                ProductRisuto = x.ProductRisuto
+                    .Select(z => new ReadProductDto {
+                        ProductId = z.Id,
+                        ProductName = z.Name,
+                        ProductDescription = z.Description,
+                        Price = z.Price
+                    })
+                    .ToList()
+            })
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (theOne == null)
             throw new NotFoundException("Category not found");
 
-        return _mapper.Map<ReadCategoryDto>(theOne);
+        return theOne;
     }
 }

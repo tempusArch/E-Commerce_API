@@ -18,6 +18,14 @@ public class ECommerceApiDbContext : DbContext {
     public DbSet<User> UserTable {get; set;}
     public DbSet<RefreshTokenModel> RefreshTokenTable {get; set;}
 
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        base.ConfigureConventions(configurationBuilder);
+
+        configurationBuilder.Properties<decimal>()
+            .HavePrecision(10, 2);
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

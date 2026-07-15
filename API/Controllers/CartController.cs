@@ -12,91 +12,49 @@ namespace ECommerceAPI.Controller;
 [ApiController]
 [Route("[controller]")]
 public class CartController : ControllerBase {
-    private readonly ECommerceApiDbContext _context;
     private readonly IMediator _mediator;
-    public CartController(ECommerceApiDbContext context, IMediator mediator) {
-        _context = context; 
+    private readonly IHttpContextService _httpContextService;
+
+    public CartController(IMediator mediator, IHttpContextService httpContextService) {     
         _mediator = mediator;
+        _httpContextService = httpContextService;
     }
 
     [HttpGet]
-    public async Task<ActionResult<AllCartItemsDto>> GetTheWholeCart() {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    public async Task<ActionResult<CartItemListResponse>> GetTheWholeCart() {
+        var userId = _httpContextService.GetCurrentUserId();
 
-        if (string.IsNullOrEmpty(userId))
-            throw new Exception("User ID claim missing");
-
-        Cart? cart = await _context.CartTable
-            .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.UserId == int.Parse(userId));
-
-        return Ok(await _mediator.Send(new GetAllCartItemsQuery(cart.Id)));
+        return Ok(await _mediator.Send(new GetAllCartItemsQuery(userId)));
     }
 
     [HttpGet("{productId}")]
-    public async Task<ActionResult<SingleCartItemDto>> GetSingleCartItem(int productId) {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    public async Task<ActionResult<ReadCartItemDto>> GetSingleCartItem(int productId) {
+        var userId = _httpContextService.GetCurrentUserId();
 
-        if (string.IsNullOrEmpty(userId))
-            throw new Exception("User ID claim missing");
-
-        Cart? cart = await _context.CartTable
-            .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.UserId == int.Parse(userId));
-
-        return Ok(await _mediator.Send(new GetOneCartItemQuery(productId, cart.Id)));
+        return Ok(await _mediator.Send(new GetOneCartItemQuery(userId, productId)));
     }
 
     [HttpPost("{productId}")]
-    public async Task<ActionResult<SingleCartItemDto>> AddIntoCartItem(int productId, [FromQuery] int quantity = 1) {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    public async Task<ActionResult<ReadCartItemDto>> CreateCartItem(int productId, [FromQuery] int quantity = 1) {
+        var userId = _httpContextService.GetCurrentUserId();
 
-        if (string.IsNullOrEmpty(userId))
-            throw new Exception("User ID claim missing");
-
-        Cart? cart = await _context.CartTable
-            .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.UserId == int.Parse(userId));
-
-        var result = await _mediator.Send(new AddIntoCartItemCommand(new CartItem {
-            ProductId = productId,
-            CartId = cart.Id,
-            Quantity = quantity
-        }));
+        var result = await _mediator.Send(new CreateCartItemCommand(userId, productId, quantity));
 
         return Created(string.Empty, result);
     }
 
     [HttpPut("{productId}")]
-    public async Task<ActionResult<SingleCartItemDto>> UpdateCartItem(int productId, [FromQuery] int quantity) {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    public async Task<ActionResult<ReadCartItemDto>> UpdateCartItem(int productId, [FromQuery] int quantity) {
+        var userId = _httpContextService.GetCurrentUserId();
 
-        if (string.IsNullOrEmpty(userId))
-            throw new Exception("User ID claim missing");
-
-        Cart? cart = await _context.CartTable
-            .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.UserId == int.Parse(userId));
-
-        return Ok(await _mediator.Send(new UpdateCartItemCommand(new CartItem {
-            ProductId = productId,
-            CartId = cart.Id,
-            Quantity = quantity
-        })));
+        return Ok(await _mediator.Send(new UpdateCartItemCommand(userId, productId, quantity)));
     }
 
     [HttpDelete("{productId}")]
     public async Task<IActionResult> DeleteCartItem(int productId) {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = _httpContextService.GetCurrentUserId();
 
-        if (string.IsNullOrEmpty(userId))
-            throw new Exception("User ID claim missing");
-
-        Cart? cart = await _context.CartTable
-            .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.UserId == int.Parse(userId));
-
-        await _mediator.Send(new DeleteCartItemCommand(productId, cart.Id));
+        await _mediator.Send(new DeleteCartItemCommand(userId, productId));
 
         return NoContent();
     }

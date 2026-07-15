@@ -3,4 +3,4 @@ using ECommerceAPI.Domain;
 
 namespace ECommerceAPI.Application;
 
-public record UpdateCartItemCommand(CartItem CartItem) : IRequest<SingleCartItemDto>;
+public record UpdateCartItemCommand(int UserId, int ProductId, int Quantity) : IRequest<ReadCartItemDto>;

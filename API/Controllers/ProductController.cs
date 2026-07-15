@@ -13,8 +13,11 @@ namespace ECommerceAPI.Controller;
 [Route("[controller]")]
 public class ProductController : ControllerBase {
     private readonly IMediator _mediator;
-    public ProductController(IMediator mediator) { 
+    private readonly IHttpContextService _httpContextService;
+
+    public ProductController(IMediator mediator, IHttpContextService httpContextService) {
         _mediator = mediator;
+        _httpContextService = httpContextService;
     }
 
     [HttpGet("{productId}")]

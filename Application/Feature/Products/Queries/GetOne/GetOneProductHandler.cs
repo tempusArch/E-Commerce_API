@@ -16,12 +16,24 @@ public class GetOneProductHandler : IRequestHandler<GetOneProductQuery, ReadProd
     public async Task<ReadProductDto> Handle(GetOneProductQuery query, CancellationToken cancellationToken) {
         var theOne = await _context.ProductTable
             .AsNoTracking()
-            .Include(p => p.CategoryRisuto)
-            .FirstOrDefaultAsync(p => p.Id == query.Id, cancellationToken);
+            .Where(x => x.Id == query.Id)
+            .Select(x => new ReadProductDto {
+                ProductId = x.Id,
+                ProductName = x.Name,
+                ProductDescription = x.Description,
+                Price = x.Price,
+                CategoryRisuto = x.CategoryRisuto
+                    .Select(z => new ReadCategoryDto {
+                        CategoryId = z.Id,
+                        CategoryName = z.Name
+                    })
+                    .ToList()
+            })
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (theOne == null)
             throw new NotFoundException("Product not found");
 
-        return _mapper.Map<ReadProductDto>(theOne);
+        return theOne;
     }
 }

@@ -15,19 +15,19 @@ namespace ECommerceAPI.Controller;
 public class PaymentController : ControllerBase {
     private readonly ECommerceApiDbContext _context;
     private readonly IMediator _mediator;
-    public PaymentController(ECommerceApiDbContext context, IMediator mediator) {
-        _context = context; 
+    private readonly IHttpContextService _httpContextService;
+
+    public PaymentController(ECommerceApiDbContext context, IMediator mediator, IHttpContextService httpContextService) {
+        _context = context;
         _mediator = mediator;
+        _httpContextService = httpContextService;
     }
 
     [HttpPost("create-paymentIntent/{orderId}")]
     public async Task<ActionResult<string>> CreatePaymentIntent(int orderId) {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = _httpContextService.GetCurrentUserId();
 
-        if (string.IsNullOrEmpty(userId))
-            throw new Exception("User ID claim missing");
-
-        var result = await _mediator.Send(new CreatePaymentIntentCommand(int.Parse(userId), orderId));
+        var result = await _mediator.Send(new CreatePaymentIntentCommand(userId, orderId));
         return Created(string.Empty, result);
     }
 
@@ -70,8 +70,8 @@ public class PaymentController : ControllerBase {
 
     private async Task HandlePaymentIntentSucceeded(PaymentIntent intent) {
         var orderId = intent.Metadata["orderId"];
-
         var order = await _context.OrderTable.FindAsync(int.Parse(orderId));
+
         if (order == null) 
             return;
 
@@ -83,9 +83,9 @@ public class PaymentController : ControllerBase {
 
     private async Task HandlePaymentFailed(PaymentIntent intent) {
         var orderId = intent.Metadata["orderId"];
-
         var order = await _context.OrderTable.FindAsync(int.Parse(orderId));
-        if (order == null) 
+        
+        if (order == null)
             return;
 
         //order.OrderStatus = OrderStatus.Failed;

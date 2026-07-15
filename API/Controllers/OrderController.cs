@@ -12,57 +12,43 @@ namespace ECommerceAPI.Controller;
 [ApiController]
 [Route("[controller]")]
 public class OrderController : ControllerBase {
-    private readonly ECommerceApiDbContext _context;
+
     private readonly IMediator _mediator;
-    public OrderController(ECommerceApiDbContext context, IMediator mediator) {
-        _context = context; 
+    private readonly IHttpContextService _httpContextService;
+
+    public OrderController(IMediator mediator, IHttpContextService httpContextService) {    
         _mediator = mediator;
+        _httpContextService = httpContextService;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<OrderDto>>> GetOneUsersAllOrders() {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    public async Task<ActionResult<IEnumerable<ReadOrderDto>>> GetOneUsersAllOrders() {
+        var userId = _httpContextService.GetCurrentUserId();
 
-        if (string.IsNullOrEmpty(userId))
-            throw new Exception("User ID claim missing");
-
-        return Ok(await _mediator.Send(new GetOneUsersAllOrdersQuery(int.Parse(userId))));
+        return Ok(await _mediator.Send(new GetOneUsersAllOrdersQuery(userId)));
     }
 
     [HttpGet("{orderId}")]
-    public async Task<ActionResult<OrderDto>> GetSingleOrderById(int orderId) {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    public async Task<ActionResult<ReadOrderDto>> GetSingleOrderById(int orderId) {
+        var userId = _httpContextService.GetCurrentUserId();
 
-        if (string.IsNullOrEmpty(userId))
-            throw new Exception("User ID claim missing");
-
-        return Ok(await _mediator.Send(new GetOneOrderQuery(int.Parse(userId), orderId)));
+        return Ok(await _mediator.Send(new GetOneOrderQuery(userId, orderId)));
     }
 
     [HttpPost]
-    public async Task<ActionResult<OrderDto>> CreateOrder() {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    public async Task<ActionResult<ReadOrderDto>> CreateOrder() {
+        var userId = _httpContextService.GetCurrentUserId();
 
-        if (string.IsNullOrEmpty(userId))
-            throw new Exception("User ID claim missing");
-
-        Cart? cart = await _context.CartTable
-            .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.UserId == int.Parse(userId));
-
-        var result = await _mediator.Send(new CreateOrderCommand(int.Parse(userId), cart.Id));
+        var result = await _mediator.Send(new CreateOrderCommand(userId));
 
         return Created(string.Empty, result);
     }
 
-    [HttpDelete("{orderId}")]
-    public async Task<IActionResult> DeleteOrder(int orderId) {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    [HttpPost("{orderId}")]
+    public async Task<IActionResult> CancelOrder(int orderId) {
+        var userId = _httpContextService.GetCurrentUserId();
 
-        if (string.IsNullOrEmpty(userId))
-            throw new Exception("User ID claim missing");
-
-        await _mediator.Send(new DeleteOrderCommand(int.Parse(userId), orderId));
+        await _mediator.Send(new CancelOrderCommand(userId, orderId));
 
         return NoContent();
     }

@@ -12,7 +12,11 @@ public class DeleteCartItemHandler : IRequestHandler<DeleteCartItemCommand, Unit
 
     public async Task<Unit> Handle(DeleteCartItemCommand command, CancellationToken cancellationToken) {
         var theOne = await _context.CartItemTable
-            .FirstOrDefaultAsync(x => x.ProductId == command.ProductId && x.CartId == command.CartId, cancellationToken);
+            .FirstOrDefaultAsync(x => 
+                x.ProductId == command.ProductId && 
+                x.UserId  ==command.UserId,
+                cancellationToken
+            );
 
         if (theOne == null)
             throw new NotFoundException("Cart item not found");

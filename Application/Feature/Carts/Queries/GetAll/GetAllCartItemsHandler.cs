@@ -4,18 +4,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ECommerceAPI.Application;
 
-public class GetAllCartItemsHandler : IRequestHandler<GetAllCartItemsQuery, AllCartItemsDto> {
+public class GetAllCartItemsHandler : IRequestHandler<GetAllCartItemsQuery, CartItemListResponse> {
     private readonly ECommerceApiDbContext _context;
     public GetAllCartItemsHandler(ECommerceApiDbContext context) {
         _context = context;         
     }
 
-    public async Task<AllCartItemsDto> Handle(GetAllCartItemsQuery query, CancellationToken cancellationToken) {
+    public async Task<CartItemListResponse> Handle(GetAllCartItemsQuery query, CancellationToken cancellationToken) {
         var result = await _context.CartItemTable
             .AsNoTracking()
-            .Where(x => x.CartId == query.CartId)
-            .Select(x => new SingleCartItemDto {
-                //ProductId = x.ProductId,
+            .Where(x => x.UserId == query.UserId)
+            .Select(x => new ReadCartItemDto {
+                ProductId = x.ProductId,
                 ProductName = x.Product.Name,
                 ProductDescription = x.Product.Description,
                 Quantity = x.Quantity,
@@ -23,10 +23,7 @@ public class GetAllCartItemsHandler : IRequestHandler<GetAllCartItemsQuery, AllC
             })
             .ToListAsync(cancellationToken);
 
-        if (!result.Any())
-            throw new NotFoundException("Cart item not found");
-
-        return new AllCartItemsDto(result);
+        return new CartItemListResponse{ Items = result };
     }
 }
 
