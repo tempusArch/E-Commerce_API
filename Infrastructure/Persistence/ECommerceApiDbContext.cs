@@ -45,6 +45,9 @@ public class ECommerceApiDbContext : DbContext {
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Product>()
+            .ToTable(t => t.HasCheckConstraint("CK_Product_Quantity_NonNegative", "Quantity >= 0"));
+
+        modelBuilder.Entity<Product>()
             .HasMany(p => p.CartItemRisuto)
             .WithOne(ci => ci.Product)
             .HasForeignKey(ci => ci.ProductId)

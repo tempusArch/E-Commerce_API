@@ -15,7 +15,9 @@ public class GetAllUsersHandler : IRequestHandler<GetAllUsersQuery, UserListResp
     }
 
     public async Task<UserListResponse> Handle(GetAllUsersQuery query, CancellationToken cancellationToken) {
-        var result = _context.UserTable
+        var limit = Math.Min(query.Limit, 100);
+        
+        var result = await _context.UserTable
             .AsNoTracking()
             .Select(x => new ReadUserDtoAdmin {
                 UserId = x.Id,
@@ -25,18 +27,14 @@ public class GetAllUsersHandler : IRequestHandler<GetAllUsersQuery, UserListResp
                 CartItemRisuto = x.Cart.CartItemRisuto,
                 OrderRisuto = x.OrderRisuto,
                 Role = x.Role
-            });
-
-        var limit = Math.Min(query.Limit, 100);
-            
-        var arranged = await result
+            })
             .OrderBy(x => x.Role)
             .ThenBy(x => x.UserId)
             .Skip((query.Page - 1) * limit)
             .Take(limit)
             .ToListAsync(cancellationToken);
 
-        return new UserListResponse {Items = arranged};
+        return new UserListResponse {Items = result};
     }
 }
 

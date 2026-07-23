@@ -28,7 +28,9 @@ public class GetManyProductsHandler : IRequestHandler<GetManyProductsQuery, Prod
         if (!string.IsNullOrWhiteSpace(query.CategoryName))
             source = source.Where(p => p.CategoryRisuto.Any(c => c.Name.Contains(query.CategoryName)));
 
-        var result = source
+        var limit = Math.Min(query.Limit, 100);
+
+        var result = await source
             .Select(x => new ReadProductDto {
                 ProductId = x.Id,
                 ProductName = x.Name,
@@ -40,18 +42,14 @@ public class GetManyProductsHandler : IRequestHandler<GetManyProductsQuery, Prod
                         CategoryName = z.Name
                     })
                     .ToList()
-            });
-
-        var limit = Math.Min(query.Limit, 100);
-            
-        var arranged = await result
+            })
             .OrderBy(p => p.ProductName)
             .ThenBy(p => p.Price)
             .Skip((query.Page - 1) * limit)
             .Take(limit)
             .ToListAsync(cancellationToken);
 
-        return new ProductListResponse {Items = arranged};
+        return new ProductListResponse {Items = result};
     }
 }
 

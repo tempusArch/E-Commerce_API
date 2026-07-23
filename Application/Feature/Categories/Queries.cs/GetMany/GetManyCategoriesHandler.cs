@@ -22,8 +22,10 @@ public class GetManyCategoriesHandler : IRequestHandler<GetManyCategoriesQuery, 
 
         if (!string.IsNullOrWhiteSpace(query.ProductName))
             source = source.Where(p => p.ProductRisuto.Any(c => c.Name.Contains(query.ProductName)));
+        
+        var limit = Math.Min(query.Limit, 100);
 
-        var result = source
+        var result = await source
             .Select(x => new ReadCategoryDto {
                 CategoryId = x.Id,
                 CategoryName = x.Name,
@@ -35,16 +37,12 @@ public class GetManyCategoriesHandler : IRequestHandler<GetManyCategoriesQuery, 
                         Price = z.Price
                     })
                     .ToList()
-            });
-                 
-        var limit = Math.Min(query.Limit, 100);
-            
-        var arranged = await result
+            })
             .OrderBy(p => p.CategoryName)
             .Skip((query.Page - 1) * limit)
             .Take(limit)
             .ToListAsync(cancellationToken);
 
-        return new CategoryListResponse {Items = arranged};
+        return new CategoryListResponse {Items = result};
     }
 }

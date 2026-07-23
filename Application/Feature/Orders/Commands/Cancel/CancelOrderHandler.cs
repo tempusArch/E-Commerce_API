@@ -24,8 +24,6 @@ public class CancelOrderHandler : IRequestHandler<CancelOrderCommand, Unit> {
         if (theOrder.OrderStatus == OrderStatus.Shipping)
             throw new InvalidOperationException("Can not cancel order as it is shipping");
 
-        theOrder.OrderStatus = OrderStatus.Cancelled;
-
         if (!string.IsNullOrEmpty(theOrder.PaymentIntentId)) {
             var refundService = new RefundService();
 

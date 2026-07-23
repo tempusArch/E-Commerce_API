@@ -19,7 +19,7 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Produc
             .AnyAsync(c => c.Name == command.CreateProductDto.Name, cancellationToken);
 
         if (isExisted)
-            throw new InvalidOperationException("Product has already existed");
+            throw new InvalidOperationException("Product name already existed");
             
         var categoryRisuto = await _context.CategoryTable
             .Where(c => command.CreateProductDto.CategoryIdRisuto.Contains(c.Id))

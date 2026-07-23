@@ -16,8 +16,8 @@ public class RegisterUserDtoValidator : AbstractValidator<RegisterUserDto> {
     }
 }
 
-public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand> {
-    public CreateUserCommandValidator() {
+public class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand> {
+    public RegisterUserCommandValidator() {
         RuleFor(x => x.RegisterUserDto).NotNull().SetValidator(new RegisterUserDtoValidator());
     }
 }

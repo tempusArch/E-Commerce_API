@@ -14,7 +14,15 @@ public class CreateCartItemHandler : IRequestHandler<CreateCartItemCommand, Read
     public async Task<ReadCartItemDto> Handle(CreateCartItemCommand command, CancellationToken cancellationToken) {
         var theProduct = await _context.ProductTable
             .AsNoTracking()
-            .FirstOrDefaultAsync(p => p.Id == command.ProductId, cancellationToken);
+            .Where(p => p.Id == command.ProductId)
+            .Select(p => new {
+                p.Id,
+                p.Name,
+                p.Description,
+                p.Price,
+                p.Quantity
+            })
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (theProduct == null)
             throw new NotFoundException("Product not found");
@@ -34,6 +42,8 @@ public class CreateCartItemHandler : IRequestHandler<CreateCartItemCommand, Read
                 cancellationToken
             );
 
+        var finalQuantity = command.Quantity;
+
         if (theCartItem == null) {
             var newOne = new CartItem {
                 ProductId = command.ProductId,
@@ -43,8 +53,10 @@ public class CreateCartItemHandler : IRequestHandler<CreateCartItemCommand, Read
             };
 
             _context.CartItemTable.Add(newOne);
-        } else
+        } else {
             theCartItem.Quantity += command.Quantity;
+            finalQuantity = theCartItem.Quantity;
+        }
 
         await _context.SaveChangesAsync(cancellationToken);
 
@@ -52,7 +64,7 @@ public class CreateCartItemHandler : IRequestHandler<CreateCartItemCommand, Read
             ProductId = theProduct.Id,
             ProductName = theProduct.Name,
             ProductDescription = theProduct.Description,
-            Quantity = command.Quantity,
+            Quantity = finalQuantity,
             UnitPrice = theProduct.Price
         };
     }

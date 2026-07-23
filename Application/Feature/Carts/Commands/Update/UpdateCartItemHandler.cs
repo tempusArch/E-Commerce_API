@@ -15,10 +15,21 @@ public class UpdateCartItemHandler : IRequestHandler<UpdateCartItemCommand, Read
     public async Task<ReadCartItemDto> Handle(UpdateCartItemCommand command, CancellationToken cancellationToken) {
         var theProduct = await _context.ProductTable
             .AsNoTracking()
-            .FirstOrDefaultAsync(p => p.Id == command.ProductId, cancellationToken);
+            .Where(p => p.Id == command.ProductId)
+            .Select(p => new {
+                p.Id,
+                p.Name,
+                p.Description,
+                p.Price,
+                p.Quantity
+            })
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (theProduct == null)
             throw new NotFoundException("Product not found");
+        
+        if (theProduct.Quantity < command.Quantity)
+            throw new InvalidOperationException($"Only {theProduct.Quantity} items of this product available");
         
         var theOne = await _context.CartItemTable
             .FirstOrDefaultAsync(x => 

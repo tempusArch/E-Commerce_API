@@ -23,7 +23,7 @@ public class UserController : ControllerBase {
     [HttpPost("register")]
     [AllowAnonymous]
     public async Task<ActionResult<UserResponse>> RegisterUser(RegisterUserDto dto) {
-        return Created(string.Empty, await _mediator.Send(new CreateUserCommand(dto)));
+        return Created(string.Empty, await _mediator.Send(new RegisterUserCommand(dto)));
     }
 
     [HttpPost("login")]
